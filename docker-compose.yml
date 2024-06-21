@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  python-script:
+    build: .
+    container_name: freeipa_service
+    env_file: .env
+    ports:
+      - "${APP_PORT}:8000"
