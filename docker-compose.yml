@@ -3,7 +3,6 @@ version: '3.9'
 services:
   python-script:
     build: .
-    container_name: freeipa_service
+    container_name: global_variables
     env_file: .env
-    ports:
-      - "${APP_PORT}:8000"
+    command: python ./main.py
