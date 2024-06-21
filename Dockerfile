@@ -1,6 +1,7 @@
 FROM python:3.11
 
-WORKDIR /usr/src/app
+#WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY . .
 
@@ -8,4 +9,4 @@ RUN pip install -r requirements.txt
 
 ENV ENV_FILE .env
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "rpc_flask:app"]
+CMD ["python", "./main.py"]
