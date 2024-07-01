@@ -1,5 +1,9 @@
 import requests
 from config import Config
+import urllib3
+
+# предупреждения о ненадежных https запросах
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def global_variables_view():
@@ -46,19 +50,23 @@ def get_projects_dict(session: requests.Session, auth_token: str) -> dict:
     response.raise_for_status()
     projects_list = response.json()
     projects_dict = {project['uuid']: project for project in projects_list['data']}
-    return projects_dict
+    filtered_projects = {uuid: project for uuid, project in projects_dict.items() if not project.get('encrypted', True)} # '01ed1955-7613-8448-08af-00b15c0c4000' ??
+    return filtered_projects
 
 def get_variables_and_print(session: requests.Session, auth_token: str, projects_dict: dict) -> str:
-    headers = {
-        'Content-Type': Config.CONTENT_TYPE,
-        'Authorization': f'Bearer {auth_token}',
-        'Referer': Config.REFERER_URL
-    }
-    response = session.post(Config.VARIABLES_URL, headers=headers, verify=Config.VERIFY_SSL)
-    response.raise_for_status()
-    variables = response.json()
-    for var in variables['defaultVariables']:
-        print(f"{var['value']['name']} - {var['eventType']} - {var['projectUuid']} - {var['uuid']} - {projects_dict.get(var['projectUuid'], {}).get('name', 'Н/Д')} - {projects_dict.get(var['projectUuid'], {}).get('description', 'Н/Д')}")
+    for project_uuid, project_info in projects_dict.items():
+        headers = {
+            'Content-Type': Config.CONTENT_TYPE,
+            'Authorization': f'Bearer {auth_token}',
+            'Referer': Config.REFERER_URL,
+                'X-Project-Uuid': project_uuid
+        }
+        response = session.post(Config.VARIABLES_URL, headers=headers, verify=Config.VERIFY_SSL)
+        response.raise_for_status()
+        variables = response.json()
+        if 'defaultVariables' in variables:
+            for var in variables['defaultVariables']:
+                print(f"{var['value']['name']} - {var['eventType']} - {var['projectUuid']} - {var['uuid']} - {projects_dict.get(var['projectUuid'], {}).get('name', 'Н/Д')} - {projects_dict.get(var['projectUuid'], {}).get('description', 'Н/Д')}")
 
 if __name__ == "__main__":
     global_variables_view()

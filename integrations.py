@@ -6,8 +6,12 @@ def global_variables_view():
     try:
         session, auth_response = get_auth_session()
         auth_token = auth_response['token']
-        projects_dict = get_projects_dict(session, auth_token)
+        projects_dict = get_integrations_list(session, auth_token)
+        
+        projects_dict2 = get_integrations_list2(session, auth_token)
+        
         print(projects_dict)
+        print(projects_dict2)
     # except HTTPError as e:
     #     print(f"HTTP error during authentication or user validation: {str(e)}", 400)
     except KeyError as e:
@@ -30,33 +34,34 @@ def get_auth_session() -> dict:
     response_data = response.json()
     return session, response_data
 
-def get_projects_dict(session: requests.Session, auth_token: str) -> dict:
+def get_integrations_list(session: requests.Session, auth_token: str) -> dict:
     
     headers = {
         'Content-Type': Config.CONTENT_TYPE,
         'Authorization': f'Bearer {auth_token}',
-        'Referer': Config.REFERER_URL
+        'Referer': Config.REFERER_URL,
+            'X-Project-Uuid': "01ef32d0-b624-dada-96aa-00b15c0c4000"
     }
-    print(headers)
     data = {
-        "limit": 0,
-        "page": 0,
-        "perPage": 0,
-        "term": ""
+  "UUIDs": [
+    "01ef32db-a668-9cdd-8e0e-00b15c0c4000"#integrationUuid
+  ]
+}
+    response = session.post(Config.TEST_URL, headers=headers, json=data, verify=Config.VERIFY_SSL)
+    response.raise_for_status()
+    projects_list = response.json()
+    print(projects_list)
+
+def get_integrations_list2(session: requests.Session, auth_token: str) -> dict:
+    
+    headers = {
+        'Content-Type': Config.CONTENT_TYPE,
+        'Authorization': f'Bearer {auth_token}',
+        'Referer': Config.REFERER_URL,
+            'X-Project-Uuid': "01ef32d0-b624-dada-96aa-00b15c0c4000"
     }
-    # response = session.post(Config.PROJECTS_URL, headers=headers, json=data, verify=Config.VERIFY_SSL)
-    # response.raise_for_status()
-    # projects_list = response.json()
-    # print(projects_list)
-    # projects_data = projects_list.get('data', [])
-    # print(projects_data)
-    # for project in projects_data:
-    #     project_uuid = project.get('uuid')
-    #     project_name = project.get('name')
-    #     print(f'UUID: {project_uuid}, Name: {project_name}')
-    #projects_dict = {project['uuid']: project for project in projects_list['data']}
-    #return projects_dict
-    response = session.post(Config.INTEGRATION_URL, headers=headers, json=data, verify=Config.VERIFY_SSL)
+    data = {'onlyGlobal': False, 'byProject': '01ef32d0-b624-dada-96aa-00b15c0c4000'}
+    response = session.post(Config.TEST_URL2, headers=headers, json=data, verify=Config.VERIFY_SSL)
     response.raise_for_status()
     projects_list = response.json()
     print(projects_list)
