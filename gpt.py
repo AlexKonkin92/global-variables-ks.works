@@ -65,7 +65,7 @@ def get_integrations_list(session: requests.Session, auth_token: str, projects_d
             'X-Project-Uuid': project_uuid
         }
         try:
-            response = session.post(Config.INTEGRATION_URL, headers=headers, verify=Config.VERIFY_SSL)
+            response = session.post(Config.TEST_TEST, headers=headers, verify=Config.VERIFY_SSL)
             response.raise_for_status()
             projects_list = response.json()
             if 'data' in projects_list:
