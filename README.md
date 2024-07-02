@@ -12,3 +12,4 @@
 # Запуск приложения
 
 Запуск осуществляется через команду docker compose up --build. 
+Документация: https://dev.ks.works/docs/
